@@ -44,11 +44,11 @@ svg_logo = """
 """
 st.markdown(f'<div style="text-align:center;">{svg_logo}</div>', unsafe_allow_html=True)
 
-# TÍTULO PRINCIPAL
+# TÍTULO
 st.title("LUGA AREQUIPA")
 st.subheader("Evaluador Inteligente de Riesgos Inmobiliarios")
 
-# FORMULARIO DE DATOS
+# FORMULARIO DE ENTRADA
 st.header("🔍 Ingrese los datos del proyecto")
 tipo_inmueble = st.selectbox("Tipo de inmueble", ["Departamento", "Casa", "Local comercial"])
 distrito = st.selectbox("Distrito de Arequipa", [
@@ -57,7 +57,7 @@ distrito = st.selectbox("Distrito de Arequipa", [
 ])
 area = st.number_input("Área construida (m²)", min_value=30, max_value=1000, value=100)
 
-# CALCULAR PRECIO AUTOMÁTICO SEGÚN DISTRITO Y ÁREA
+# CALCULAR PRECIO POR DISTRITO
 def mostrar_precio_distrital(distrito, area):
     precios_usd = {
         "Cayma": 1100, "Yanahuara": 1050, "Cerro Colorado": 950,
@@ -86,7 +86,7 @@ precio_m2_pen, precio_total = mostrar_precio_distrital(distrito, area)
 etapa = st.selectbox("Etapa del proyecto", ["Diseño", "Preventa", "Construcción", "Entrega"])
 experiencia = st.radio("¿El inversionista tiene experiencia previa?", ["Sí", "No"])
 
-# BOTÓN PARA EVALUAR
+# EVALUACIÓN
 if st.button("Evaluar Riesgo"):
     puntaje = 0
     if precio_total and precio_total > 800000:
@@ -110,13 +110,26 @@ if st.button("Evaluar Riesgo"):
     st.header("📊 Resultado de Evaluación")
     st.success(f"El **riesgo estimado** del proyecto es: **{riesgo}**")
 
-    # Opinión profesional
+    # Opiniones técnicas y comerciales
     if riesgo.startswith("BAJO"):
-        st.markdown("✅ Buenas condiciones técnicas y alta demanda según expertos.")
+        st.markdown("""
+        ✅ **Ingeniero Civil**: El proyecto presenta condiciones técnicas estables y ubicación favorable.
+
+        💼 **Asesor Inmobiliario**: Alta demanda en la zona, buenos servicios, y valor competitivo por metro cuadrado. Ideal para inversión segura.
+        """)
     elif riesgo.startswith("MEDIO"):
-        st.markdown("⚠️ Revisar condiciones y entorno con más detalle.")
+        st.markdown("""
+        ⚠️ **Ingeniero Civil**: Algunos factores como etapa temprana o ubicación moderada requieren atención.
+
+        💼 **Asesor Inmobiliario**: El mercado puede ser incierto en esta zona. Evaluar precios similares y comportamiento de oferta y demanda.
+        """)
     else:
-        st.markdown("🚨 Zona o condiciones técnicas pueden generar riesgo de inversión.")
+        st.markdown("""
+        🚨 **Ingeniero Civil**: Posibles riesgos por área reducida, servicios limitados o etapa muy temprana del proyecto.
+
+        💼 **Asesor Inmobiliario**: Zona con baja rotación o exceso de oferta. Riesgo de venta lenta o baja rentabilidad.
+        """)
 
     st.markdown("> Esta evaluación es referencial. Contacta a **LUGA AREQUIPA** para un análisis completo.")
+
 
