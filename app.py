@@ -1,5 +1,3 @@
-# Código final con mejoras: actualización dinámica del distrito y cálculo automático del precio del proyecto
-codigo_corregido = '''
 import streamlit as st
 
 # CONFIGURACIÓN GENERAL
@@ -24,7 +22,7 @@ header, .stApp {
 </style>
 """, unsafe_allow_html=True)
 
-# LOGO
+# LOGO SVG
 svg_logo = """
 <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -46,6 +44,7 @@ svg_logo = """
 """
 st.markdown(f'<div style="text-align:center;">{svg_logo}</div>', unsafe_allow_html=True)
 
+# TÍTULO PRINCIPAL
 st.title("LUGA AREQUIPA")
 st.subheader("Evaluador Inteligente de Riesgos Inmobiliarios")
 
@@ -120,12 +119,4 @@ if st.button("Evaluar Riesgo"):
         st.markdown("🚨 Zona o condiciones técnicas pueden generar riesgo de inversión.")
 
     st.markdown("> Esta evaluación es referencial. Contacta a **LUGA AREQUIPA** para un análisis completo.")
-'''
-
-# Guardar archivo final
-ruta_final_mejorada = "/mnt/data/luga_arequipa_risk_final.py"
-with open(ruta_final_mejorada, "w", encoding="utf-8") as f:
-    f.write(codigo_corregido)
-
-ruta_final_mejorada
 
