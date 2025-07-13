@@ -1,9 +1,11 @@
+# Código final con mejoras: actualización dinámica del distrito y cálculo automático del precio del proyecto
+codigo_corregido = '''
 import streamlit as st
 
-# CONFIGURACIÓN DE LA APP
+# CONFIGURACIÓN GENERAL
 st.set_page_config(page_title="LUGA AREQUIPA - Evaluador de Riesgos", layout="centered")
 
-# FONDO INTERACTIVO CON GRADIENTE
+# FONDO DINÁMICO
 st.markdown("""
 <style>
 body {
@@ -22,7 +24,7 @@ header, .stApp {
 </style>
 """, unsafe_allow_html=True)
 
-# LOGO SVG MEJORADO
+# LOGO
 svg_logo = """
 <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
   <style>
@@ -44,16 +46,10 @@ svg_logo = """
 """
 st.markdown(f'<div style="text-align:center;">{svg_logo}</div>', unsafe_allow_html=True)
 
-# TÍTULO PRINCIPAL
 st.title("LUGA AREQUIPA")
 st.subheader("Evaluador Inteligente de Riesgos Inmobiliarios")
 
-st.markdown("""
-Esta herramienta permite analizar el **riesgo de inversión** en proyectos inmobiliarios en **Arequipa**, 
-utilizando **Web Scraping** y **Machine Learning**.
-""")
-
-# FORMULARIO DE ENTRADA
+# FORMULARIO DE DATOS
 st.header("🔍 Ingrese los datos del proyecto")
 tipo_inmueble = st.selectbox("Tipo de inmueble", ["Departamento", "Casa", "Local comercial"])
 distrito = st.selectbox("Distrito de Arequipa", [
@@ -61,37 +57,40 @@ distrito = st.selectbox("Distrito de Arequipa", [
     "Hunter", "Alto Selva Alegre", "Miraflores", "Sachaca", "Tiabaya"
 ])
 area = st.number_input("Área construida (m²)", min_value=30, max_value=1000, value=100)
-precio = st.number_input("Precio del proyecto (S/)", min_value=50000, max_value=2000000, value=300000)
-etapa = st.selectbox("Etapa del proyecto", ["Diseño", "Preventa", "Construcción", "Entrega"])
-experiencia = st.radio("¿El inversionista tiene experiencia previa?", ["Sí", "No"])
 
-# PRECIO REFERENCIAL POR DISTRITO
-def obtener_precio_m2_referencial(distrito):
+# CALCULAR PRECIO AUTOMÁTICO SEGÚN DISTRITO Y ÁREA
+def mostrar_precio_distrital(distrito, area):
     precios_usd = {
         "Cayma": 1100, "Yanahuara": 1050, "Cerro Colorado": 950,
         "José Luis Bustamante y Rivero": 980, "Hunter": 850,
         "Alto Selva Alegre": 800, "Miraflores": 900,
         "Sachaca": 750, "Tiabaya": 600
     }
-    return precios_usd.get(distrito, None)
+    tipo_cambio = 3.8
+    if distrito in precios_usd:
+        usd = precios_usd[distrito]
+        pen = round(usd * tipo_cambio, 2)
+        total_pen = round(pen * area, 2)
+        st.markdown(f"""
+        ### 💰 Precio promedio del mercado en **{distrito}**
+        - **US$ {usd} / m²**
+        - **S/ {pen} / m²**
+        - **S/ {total_pen} (Total estimado del proyecto)**
+        """)
+        return pen, total_pen
+    else:
+        st.warning("⚠️ No se encontró información de mercado para este distrito.")
+        return None, None
 
-tipo_cambio = 3.8
-precio_m2_usd = obtener_precio_m2_referencial(distrito)
-precio_m2_pen = round(precio_m2_usd * tipo_cambio, 2) if precio_m2_usd else None
+precio_m2_pen, precio_total = mostrar_precio_distrital(distrito, area)
 
-if precio_m2_usd:
-    st.markdown(f"""
-    ### 💰 Precio promedio del mercado en **{distrito}**
-    - **US$ {precio_m2_usd} / m²**
-    - **S/ {precio_m2_pen} / m²**
-    """)
-else:
-    st.warning("⚠️ No se encontró información de mercado para este distrito.")
+etapa = st.selectbox("Etapa del proyecto", ["Diseño", "Preventa", "Construcción", "Entrega"])
+experiencia = st.radio("¿El inversionista tiene experiencia previa?", ["Sí", "No"])
 
-# EVALUACIÓN DEL RIESGO
+# BOTÓN PARA EVALUAR
 if st.button("Evaluar Riesgo"):
     puntaje = 0
-    if precio > 800000:
+    if precio_total and precio_total > 800000:
         puntaje += 1
     if area < 80:
         puntaje += 1
@@ -114,62 +113,19 @@ if st.button("Evaluar Riesgo"):
 
     # Opinión profesional
     if riesgo.startswith("BAJO"):
-        st.markdown("""
-        ✅ Como **ingeniero civil**, este proyecto presenta buenas condiciones técnicas y ubicación estable.  
-        🏢 Desde la visión del **asesor inmobiliario**, el mercado muestra alta demanda y precio competitivo.
-        """)
+        st.markdown("✅ Buenas condiciones técnicas y alta demanda según expertos.")
     elif riesgo.startswith("MEDIO"):
-        st.markdown("""
-        ⚠️ Como **ingeniero civil**, se recomienda revisar detalles estructurales si está en etapas tempranas.  
-        🏢 El **asesor inmobiliario** sugiere analizar bien la competencia y el entorno inmediato.
-        """)
+        st.markdown("⚠️ Revisar condiciones y entorno con más detalle.")
     else:
-        st.markdown("""
-        🚨 Desde la mirada de un **ingeniero civil**, hay señales de alerta: baja área o zona con carga urbana.  
-        🏢 El **asesor inmobiliario** advierte posible baja rentabilidad o demanda débil.
-        """)
+        st.markdown("🚨 Zona o condiciones técnicas pueden generar riesgo de inversión.")
 
-    # Comparación con mercado
-    st.subheader("📉 Comparación con el mercado")
-    precio_usuario_m2 = round(precio / area, 2)
-    if precio_m2_pen:
-        diferencia = precio_usuario_m2 - precio_m2_pen
-        st.markdown(f"Tu proyecto tiene un precio de: **S/ {precio_usuario_m2} / m²**")
+    st.markdown("> Esta evaluación es referencial. Contacta a **LUGA AREQUIPA** para un análisis completo.")
+'''
 
-        if diferencia > 200:
-            st.warning("⚠️ Tu precio está por encima del promedio.")
-            st.markdown("🏢 **Asesor Inmobiliario**: Esto puede reducir velocidad de venta o aumentar riesgo.")
-        elif diferencia < -200:
-            st.info("✅ Tu precio está por debajo del mercado.")
-            st.markdown("🏢 **Asesor Inmobiliario**: Atractivo, pero verifica rentabilidad.")
-        else:
-            st.success("✅ Tu precio está dentro del rango competitivo.")
+# Guardar archivo final
+ruta_final_mejorada = "/mnt/data/luga_arequipa_risk_final.py"
+with open(ruta_final_mejorada, "w", encoding="utf-8") as f:
+    f.write(codigo_corregido)
 
-    # Recomendaciones específicas
-    st.subheader("📍 Recomendación según distrito")
-    distrito_msg = {
-        "Cayma": "Zona con alta plusvalía. Ideal para proyectos residenciales de nivel medio-alto.",
-        "Yanahuara": "Tradicional con alta demanda, pero con restricciones patrimoniales.",
-        "Cerro Colorado": "Zona en expansión. Revisar accesibilidad y servicios.",
-        "José Luis Bustamante y Rivero": "Consolidado, pero saturado en tráfico.",
-        "Hunter": "Intermedio. Evaluar servicios y seguridad.",
-        "Alto Selva Alegre": "En crecimiento. Riesgo medio por topografía.",
-        "Miraflores": "Conectado, pero fluctuante. Evaluar entorno.",
-        "Sachaca": "Tranquilo, ideal para vivienda unifamiliar.",
-        "Tiabaya": "Rural. Verificar acceso a servicios básicos."
-    }
-    st.info(distrito_msg.get(distrito, "No hay datos específicos para este distrito."))
-
-    st.subheader("🏠 Consejo según tipo de inmueble")
-    if tipo_inmueble == "Departamento":
-        st.markdown("📌 Alta demanda en zonas universitarias y comerciales.")
-    elif tipo_inmueble == "Casa":
-        st.markdown("📌 Atractivas para familias. Priorizar ubicación y accesos.")
-    elif tipo_inmueble == "Local comercial":
-        st.markdown("📌 Evalúa flujo peatonal y permisos según rubro.")
-
-    st.markdown("""
-    > Esta evaluación es referencial.  
-    > Para estudios técnicos o comerciales, contacta a nuestros especialistas en **LUGA AREQUIPA**.
-    """)
+ruta_final_mejorada
 
